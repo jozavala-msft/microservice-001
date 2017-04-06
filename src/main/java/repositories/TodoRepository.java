@@ -1,6 +1,5 @@
 package repositories;
 
-import com.google.gson.Gson;
 import database.Database;
 import models.Todo;
 
@@ -14,12 +13,10 @@ import java.util.UUID;
 public class TodoRepository {
 
     private Database database;
-    private Gson gson;
 
     @Inject
-    public TodoRepository(Database database, Gson gson) {
+    public TodoRepository(Database database) {
         this.database = database;
-        this.gson = gson;
     }
 
     /**
