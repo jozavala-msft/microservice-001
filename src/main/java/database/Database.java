@@ -1,12 +1,15 @@
 package database;
 
 import com.google.common.io.Files;
+import com.google.gson.Gson;
 import org.lmdbjava.Dbi;
 import org.lmdbjava.Env;
 import org.lmdbjava.Txn;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
@@ -17,6 +20,7 @@ import static org.lmdbjava.Env.create;
 
 public class Database {
 
+    private Gson gson = new Gson();
     private String name;
     private Dbi<ByteBuffer> dbi;
     private Env<ByteBuffer> env;
@@ -46,6 +50,27 @@ public class Database {
         // MDB_CREATE flag causes the DB to be created if it doesn't already exist.
         final Dbi<ByteBuffer> dbi = env.openDbi(name, MDB_CREATE);
         return new Database(name, dbi, env);
+    }
+
+    /**
+     * Stores an object
+     * @param key
+     * @param entity
+     * @return
+     */
+    public int store(String key, Object entity) {
+        String payload = gson.toJson(entity);
+        return put(key, payload);
+    }
+
+    /**
+     * Fetches an object from the database
+     * @param key
+     * @param <T>
+     * @return
+     */
+    public <T> Optional<T> fetch(String key, Class<T> clzz) {
+        return get(key).map(Database::decodeToString).map(d -> gson.fromJson(d, clzz));
     }
 
     /**

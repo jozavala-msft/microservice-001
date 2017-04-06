@@ -37,18 +37,16 @@ public class TodoRepository {
             .dueDate(dueDate)
             .createdBy(createdBy);
         String uuid = UUID.randomUUID().toString();
-        database.put(uuid, gson.toJson(todoBldr.build()));
+        database.store(uuid, todoBldr.build());
         return todoBldr.uuid(uuid).build();
     }
 
     /**
      * Fetches a todo from the database
      * @param uuid
-     * @return
+     * @return {@link Optional<Todo>}
      */
     public Optional<Todo> getTodo(String uuid) {
-        return database.get(uuid)
-            .map(Database::decodeToString)
-            .map(value -> gson.fromJson(value, Todo.class));
+        return database.fetch(uuid, Todo.class);
     }
 }
