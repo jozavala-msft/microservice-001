@@ -3,11 +3,9 @@ package repositories;
 import database.Cursor;
 import database.Database;
 import models.Todo;
-import org.lmdbjava.CursorIterator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 @Singleton

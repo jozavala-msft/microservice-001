@@ -1,7 +1,5 @@
 package database;
 
-
-import models.Todo;
 import org.lmdbjava.CursorIterator;
 import org.lmdbjava.Txn;
 
