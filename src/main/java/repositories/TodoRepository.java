@@ -1,6 +1,6 @@
 package repositories;
 
-import org.lmdbjava.Dbi;
+import database.Database;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -8,10 +8,10 @@ import javax.inject.Singleton;
 @Singleton
 public class TodoRepository {
 
-    private Dbi dbi;
+    private Database database;
 
     @Inject
-    public TodoRepository(Dbi dbi) {
-        this.dbi = dbi;
+    public TodoRepository(Database database) {
+        this.database = database;
     }
 }
