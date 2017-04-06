@@ -27,7 +27,7 @@ public class ConfigurationController implements RouteProvider {
     @Override
     public Stream<? extends Route<? extends AsyncHandler<?>>> routes() {
         return Stream.of(
-            Route.sync("GET", "/configuration/filename", context -> Response.of(Status.OK, database.getDirectoryPath()))
+            Route.sync("GET", "/configuration/databaseDirectory", context -> Response.of(Status.OK, database.getDirectoryPath()))
         );
     }
 }
