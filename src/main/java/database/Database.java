@@ -2,6 +2,7 @@ package database;
 
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import org.lmdbjava.CursorIterator;
 import org.lmdbjava.Dbi;
 import org.lmdbjava.Env;
 import org.lmdbjava.Txn;
@@ -13,22 +14,24 @@ import java.util.Optional;
 
 import static java.nio.ByteBuffer.allocateDirect;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.lmdbjava.CursorIterator.IteratorType.FORWARD;
 import static org.lmdbjava.DbiFlags.MDB_CREATE;
 import static org.lmdbjava.Env.create;
 
 public class Database {
 
-    private Gson gson = new Gson();
+    private Gson gson;
     private String name;
     private File dir;
     private Dbi<ByteBuffer> dbi;
     private Env<ByteBuffer> env;
 
-    private Database(String name, File dir, Dbi<ByteBuffer> dbi, Env<ByteBuffer> env) {
+    private Database(String name, File dir, Dbi<ByteBuffer> dbi, Env<ByteBuffer> env, Gson gson) {
         this.name = name;
         this.dir = dir;
         this.dbi = dbi;
         this.env = env;
+        this.gson = gson;
     }
 
     /**
@@ -39,7 +42,7 @@ public class Database {
         return dir.getPath();
     }
 
-    public static Database createDB(String name) throws IOException {
+    public static Database createDB(String name, Gson gson) throws IOException {
         File dir = Files.createTempDir();
         // We always need an Env. An Env owns a physical on-disk storage file. One
         // Env can store many different databases (ie sorted maps).
@@ -57,7 +60,7 @@ public class Database {
         // We need a Dbi for each DB. A Dbi roughly equates to a sorted map. The
         // MDB_CREATE flag causes the DB to be created if it doesn't already exist.
         final Dbi<ByteBuffer> dbi = env.openDbi(name, MDB_CREATE);
-        return new Database(name, dir, dbi, env);
+        return new Database(name, dir, dbi, env, gson);
     }
 
     /**
@@ -69,6 +72,18 @@ public class Database {
     public int store(String key, Object entity) {
         String payload = gson.toJson(entity);
         return put(key, payload);
+    }
+
+    /**
+     * Decode an entity
+     * @param value
+     * @param clzz
+     * @param <T>
+     * @return
+     */
+    public <T> T decode(ByteBuffer value, Class<T> clzz) {
+        String decoded = decodeToString(value);
+        return gson.fromJson(decoded, clzz);
     }
 
     /**
@@ -138,6 +153,15 @@ public class Database {
             //return fetchedVal;
         }
         return Optional.ofNullable(found);
+    }
+
+    /**
+     * Retrieve a cursor iterator
+     * @return
+     */
+    public CursorIterator<ByteBuffer> getIterator() {
+        final Txn<ByteBuffer> txn = env.txnRead();
+        return dbi.iterate(txn, FORWARD);
     }
 
     /**

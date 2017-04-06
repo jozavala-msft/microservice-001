@@ -2,12 +2,12 @@ package repositories;
 
 import database.Database;
 import models.Todo;
+import org.lmdbjava.CursorIterator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 @Singleton
 public class TodoRepository {
@@ -20,6 +20,20 @@ public class TodoRepository {
     }
 
     /**
+     * Retrieve all created todos
+     * @return {@link List<Todo>}
+     */
+    public List<Todo> getTodos() {
+        List<Todo> todos = new ArrayList<>();
+        try (CursorIterator<ByteBuffer> it = database.getIterator()) {
+            for (final CursorIterator.KeyVal<ByteBuffer> kv : it.iterable()) {
+                todos.add(database.decode(kv.val(), Todo.class));
+            }
+        }
+        return todos;
+    }
+
+    /**
      * Stores a todo in the database
      * @param name        The name of the todo
      * @param description Description of the todo
@@ -28,14 +42,16 @@ public class TodoRepository {
      * @return {@link Todo}
      */
     public Todo createTodo(String name, String description, Date dueDate, String createdBy) {
-        Todo.TodoBuilder todoBldr = Todo.builder()
+        String uuid = UUID.randomUUID().toString();
+        Todo todo = Todo.builder()
             .name(name)
             .description(description)
             .dueDate(dueDate)
-            .createdBy(createdBy);
-        String uuid = UUID.randomUUID().toString();
-        database.store(uuid, todoBldr.build());
-        return todoBldr.uuid(uuid).build();
+            .createdBy(createdBy)
+            .uuid(uuid)
+            .build();
+        database.store(uuid, todo);
+        return todo;
     }
 
     /**

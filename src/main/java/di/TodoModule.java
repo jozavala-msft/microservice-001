@@ -13,8 +13,8 @@ public class TodoModule extends AbstractModule {
     private final Gson gson;
 
     public TodoModule() throws IOException {
-        this.database = Database.createDB(DB_NAME);
         this.gson = new Gson();
+        this.database = Database.createDB(DB_NAME, gson);
     }
 
     @Override

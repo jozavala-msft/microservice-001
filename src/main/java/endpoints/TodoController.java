@@ -11,6 +11,7 @@ import repositories.TodoRepository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Singleton
@@ -28,6 +29,10 @@ public class TodoController implements RouteProvider {
     @Override
     public Stream<? extends Route<? extends AsyncHandler<?>>> routes() {
         return Stream.of(
+            Route.sync("GET", "/todos", context -> {
+                List<Todo> todos = todoRepository.getTodos();
+                return Response.of(Status.OK, todos);
+            }),
             Route.sync("GET", "/todos/<uuid>", context ->
                 todoRepository.getTodo(helper.fromContext(context).getPathArg("uuid")).map(
                     foundTodo -> Response.of(Status.OK, foundTodo)
