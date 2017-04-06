@@ -1,4 +1,4 @@
-package endpoints;
+package endpoints.utils;
 
 import com.google.gson.Gson;
 import com.spotify.apollo.RequestContext;
@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-class RequestHelper {
+public class RequestHelper {
 
     private Gson gson;
 

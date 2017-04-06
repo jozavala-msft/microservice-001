@@ -1,17 +1,16 @@
-package endpoints;
-
+package endpoints.utils;
 
 import com.google.gson.Gson;
 import com.spotify.apollo.RequestContext;
 
 import java.util.Optional;
 
-class RequestRepository {
+public class RequestRepository {
 
     private RequestContext context;
     private Gson gson;
 
-    public RequestRepository(RequestContext context, Gson gson) {
+    RequestRepository(RequestContext context, Gson gson) {
         this.context = context;
         this.gson = gson;
     }

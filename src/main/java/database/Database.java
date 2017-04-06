@@ -8,8 +8,6 @@ import org.lmdbjava.Txn;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
@@ -22,13 +20,23 @@ public class Database {
 
     private Gson gson = new Gson();
     private String name;
+    private File dir;
     private Dbi<ByteBuffer> dbi;
     private Env<ByteBuffer> env;
 
-    private Database(String name, Dbi<ByteBuffer> dbi, Env<ByteBuffer> env) {
+    private Database(String name, File dir, Dbi<ByteBuffer> dbi, Env<ByteBuffer> env) {
         this.name = name;
+        this.dir = dir;
         this.dbi = dbi;
         this.env = env;
+    }
+
+    /**
+     * Get database directory path
+     * @return
+     */
+    public String getDirectoryPath() {
+        return dir.getPath();
     }
 
     public static Database createDB(String name) throws IOException {
@@ -49,7 +57,7 @@ public class Database {
         // We need a Dbi for each DB. A Dbi roughly equates to a sorted map. The
         // MDB_CREATE flag causes the DB to be created if it doesn't already exist.
         final Dbi<ByteBuffer> dbi = env.openDbi(name, MDB_CREATE);
-        return new Database(name, dbi, env);
+        return new Database(name, dir, dbi, env);
     }
 
     /**
@@ -78,11 +86,11 @@ public class Database {
      * @param key   The key in its string representation
      * @param value The value in its string representation
      */
-    public int put(String key, String value) {
+    private int put(String key, String value) {
         return put(key.getBytes(UTF_8), value.getBytes(UTF_8));
     }
 
-    public ByteBuffer allocate(byte[] bytes, int size) {
+    private ByteBuffer allocate(byte[] bytes, int size) {
         final ByteBuffer buffer = allocateDirect(size);
         buffer.put(bytes).flip();
         return buffer;
@@ -93,7 +101,7 @@ public class Database {
      * @param bKey
      * @param bValue
      */
-    public int put(byte[] bKey, byte[] bValue) {
+    private int put(byte[] bKey, byte[] bValue) {
         // We want to store some data, so we will need a direct ByteBuffer.
         // Note that LMDB keys cannot exceed maxKeySize bytes (511 bytes by default).
         // Values can be larger.
@@ -111,7 +119,7 @@ public class Database {
      * @param key
      * @return
      */
-    public Optional<ByteBuffer> get(String key) {
+    private Optional<ByteBuffer> get(String key) {
         return get(key.getBytes(UTF_8));
     }
 
@@ -120,7 +128,7 @@ public class Database {
      * @param bKey
      * @return
      */
-    public Optional<ByteBuffer> get(byte[] bKey) {
+    private Optional<ByteBuffer> get(byte[] bKey) {
         ByteBuffer found;
         final ByteBuffer key = allocate(bKey, env.getMaxKeySize());
         try (Txn<ByteBuffer> txn = env.txnRead()) {
@@ -137,7 +145,7 @@ public class Database {
      * @param buffer
      * @return
      */
-    public static String decodeToString(ByteBuffer buffer) {
+    private static String decodeToString(ByteBuffer buffer) {
         return UTF_8.decode(buffer).toString();
     }
 }
