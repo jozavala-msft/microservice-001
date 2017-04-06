@@ -1,0 +1,76 @@
+{
+	"variables": [],
+	"info": {
+		"name": "TODO",
+		"_postman_id": "68bb3860-b2de-8825-9403-91c13975fe26",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST Create TODO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"uuid\", jsonData.uuid);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:9001/todos",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"dasdasd\",\n\t\"description\": \"Dasdasd\",\n\t\"createdBy\": \"pollo\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Todos by uuid",
+			"request": {
+				"url": "http://localhost:9001/todos/{{uuid}}",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Configuration filename",
+			"request": {
+				"url": "http://localhost:9001/configuration/databaseDirectory",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get TODOS",
+			"request": {
+				"url": "http://localhost:9001/todos",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
