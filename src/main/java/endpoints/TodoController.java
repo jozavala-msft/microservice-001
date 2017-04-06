@@ -5,21 +5,20 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.route.RouteProvider;
-import org.apache.ignite.IgniteCache;
+import repositories.TodoRepository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 @Singleton
 public class TodoController implements RouteProvider {
 
-    private IgniteCache cache;
+    private TodoRepository todoRepository;
 
     @Inject
-    public TodoController(IgniteCache cache) {
-        this.cache = cache;
+    public TodoController(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
     }
 
     @Override

@@ -6,11 +6,14 @@ import com.spotify.apollo.httpservice.LoadingException;
 import di.TodoModule;
 import endpoints.TodoController;
 
+import java.io.IOException;
+
 public class App {
 
-    static Injector injector = Guice.createInjector(new TodoModule());
+    static Injector injector;
 
-    public static void main(String[] args) throws LoadingException {
+    public static void main(String[] args) throws LoadingException, IOException {
+        injector = Guice.createInjector(new TodoModule());
         HttpService.boot(App::init, "microservice-001", args);
     }
 
