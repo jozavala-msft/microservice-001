@@ -30,7 +30,12 @@ public class TodoController implements RouteProvider {
     public Stream<? extends Route<? extends AsyncHandler<?>>> routes() {
         return Stream.of(
             Route.sync("GET", "/todos", context -> {
-                List<Todo> todos = todoRepository.getTodos();
+                List<Todo> todos = null;
+                try {
+                    todos = todoRepository.getTodos();
+                } catch (Exception e) {
+                    return Response.of(Status.INTERNAL_SERVER_ERROR, e.getMessage());
+                }
                 return Response.of(Status.OK, todos);
             }),
             Route.sync("GET", "/todos/<uuid>", context ->

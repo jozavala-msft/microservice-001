@@ -159,9 +159,10 @@ public class Database {
      * Retrieve a cursor iterator
      * @return
      */
-    public CursorIterator<ByteBuffer> getIterator() {
+    public <T> Cursor<T> getForwardIterator(Class<T> clzz) {
         final Txn<ByteBuffer> txn = env.txnRead();
-        return dbi.iterate(txn, FORWARD);
+        CursorIterator<ByteBuffer> cursorIterator = dbi.iterate(txn, FORWARD);
+        return new Cursor<>(this, cursorIterator, clzz, txn);
     }
 
     /**

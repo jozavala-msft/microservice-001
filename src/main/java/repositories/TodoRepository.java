@@ -1,5 +1,6 @@
 package repositories;
 
+import database.Cursor;
 import database.Database;
 import models.Todo;
 import org.lmdbjava.CursorIterator;
@@ -23,11 +24,11 @@ public class TodoRepository {
      * Retrieve all created todos
      * @return {@link List<Todo>}
      */
-    public List<Todo> getTodos() {
+    public List<Todo> getTodos() throws Exception {
         List<Todo> todos = new ArrayList<>();
-        try (CursorIterator<ByteBuffer> it = database.getIterator()) {
-            for (final CursorIterator.KeyVal<ByteBuffer> kv : it.iterable()) {
-                todos.add(database.decode(kv.val(), Todo.class));
+        try (Cursor<Todo> it = database.getForwardIterator(Todo.class)) {
+            for (Todo todo : it.iterable()) {
+                todos.add(todo);
             }
         }
         return todos;
