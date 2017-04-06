@@ -7,7 +7,7 @@ import lombok.ToString;
 import java.util.Date;
 
 @ToString
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Todo {
 
