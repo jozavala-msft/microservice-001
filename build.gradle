@@ -44,3 +44,12 @@ dependencies {
 // Define the main class for the application
 mainClassName = 'App'
 
+jar {
+    manifest {
+        attributes 'Main-Class': "$mainClassName"
+    }
+    doFirst {
+        from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+}
+
