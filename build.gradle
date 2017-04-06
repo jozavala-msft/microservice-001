@@ -36,7 +36,7 @@ dependencies {
     compile 'joda-time:joda-time:2.9.9'
     compile 'javax.validation:validation-api:1.1.0.Final'
     compile 'org.lmdbjava:lmdbjava:0.0.5'
-    compileOnly 'org.projectlombok:lombok:1.12.4'
+    compileOnly 'org.projectlombok:lombok:1.16.16'
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
