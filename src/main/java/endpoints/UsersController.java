@@ -6,6 +6,7 @@ import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.route.RouteProvider;
 import endpoints.utils.RequestHelper;
+import models.Login;
 import models.User;
 import repositories.UsersRepository;
 
@@ -28,9 +29,16 @@ public class UsersController implements RouteProvider {
     @Override
     public Stream<? extends Route<? extends AsyncHandler<?>>> routes() {
         return Stream.of(
-            Route.sync("GET", "/users/<username>", context->
-                repository.getUser(helper.fromContext(context).getPathArg("username")).map(
-                    user -> Response.of(Status.OK, user)
+            Route.sync("POST", "/users/login", context ->
+                helper.fromContext(context).fetchJson(Login.class).map(login ->
+                    repository.login(login.getUsername(), login.getPassword()).map(
+                        user -> Response.forStatus(Status.OK)
+                    ).orElse(Response.forStatus(Status.FORBIDDEN))
+                ).orElse(Response.forStatus(Status.BAD_REQUEST))
+            ),
+            Route.sync("GET", "/users/<username>", context ->
+                repository.getUser(helper.fromContext(context).getPathArg("username")).map(user ->
+                    Response.of(Status.OK, user)
                 ).orElse(Response.forStatus(Status.NOT_FOUND))
             ),
             Route.sync("POST", "/users", context -> helper.fromContext(context).fetchJson(User.class).map(user ->

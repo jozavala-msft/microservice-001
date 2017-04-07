@@ -20,6 +20,16 @@ public class UsersRepository {
     }
 
     /**
+     * Perform a login
+     * @param username
+     * @param password
+     * @return {@link Optional<User>}
+     */
+    public Optional<User> login(String username, String password) {
+        return database.fetch(username + ":" + password, User.class);
+    }
+
+    /**
      * Create a new user
      * @param username
      * @param password
@@ -29,6 +39,9 @@ public class UsersRepository {
         String uuid = UUID.randomUUID().toString();
         User user = User.builder().uuid(uuid).username(username).password(password).build();
         boolean bRet = database.store(username, user, true);
+        if(bRet) {
+            database.store(username + ":" + password, username, true);
+        }
         return bRet ? Optional.of(user) : Optional.empty();
     }
 
