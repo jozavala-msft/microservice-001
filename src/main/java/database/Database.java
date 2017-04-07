@@ -1,73 +1,35 @@
 package database;
 
-import com.google.common.io.Files;
 import com.google.gson.Gson;
 import org.lmdbjava.CursorIterator;
 import org.lmdbjava.Dbi;
 import org.lmdbjava.Env;
 import org.lmdbjava.Txn;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
 import static java.nio.ByteBuffer.allocateDirect;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.lmdbjava.CursorIterator.IteratorType.FORWARD;
-import static org.lmdbjava.DbiFlags.MDB_CREATE;
-import static org.lmdbjava.Env.create;
 
 public class Database {
 
-    private Gson gson;
-    private String name;
-    private File dir;
-    private Dbi<ByteBuffer> dbi;
     private Env<ByteBuffer> env;
+    private Dbi<ByteBuffer> dbi;
+    private Gson gson;
 
-    private Database(String name, File dir, Dbi<ByteBuffer> dbi, Env<ByteBuffer> env, Gson gson) {
-        this.name = name;
-        this.dir = dir;
+    public Database(Dbi<ByteBuffer> dbi, Env<ByteBuffer> env, Gson gson) {
         this.dbi = dbi;
         this.env = env;
         this.gson = gson;
     }
 
     /**
-     * Get database directory path
-     * @return
-     */
-    public String getDirectoryPath() {
-        return dir.getPath();
-    }
-
-    public static Database createDB(String name, Gson gson) throws IOException {
-        File dir = Files.createTempDir();
-        // We always need an Env. An Env owns a physical on-disk storage file. One
-        // Env can store many different databases (ie sorted maps).
-        final Env<ByteBuffer> env = create()
-            // LMDB also needs to know how large our DB might be. Over-estimating is OK.
-            .setMapSize(10_485_760)
-            // LMDB also needs to know how many DBs (Dbi) we want to store in this Env.
-            .setMaxDbs(1)
-            .setMaxReaders(10)
-            // Now let's open the Env. The same path can be concurrently opened and
-            // used in different processes, but do not open the same path twice in
-            // the same process at the same time.
-            .open(dir);
-
-        // We need a Dbi for each DB. A Dbi roughly equates to a sorted map. The
-        // MDB_CREATE flag causes the DB to be created if it doesn't already exist.
-        final Dbi<ByteBuffer> dbi = env.openDbi(name, MDB_CREATE);
-        return new Database(name, dir, dbi, env, gson);
-    }
-
-    /**
      * Stores an object
      * @param key
      * @param entity
-     * @return
+     * @return The number of bytes left in the key
      */
     public int store(String key, Object entity) {
         String payload = gson.toJson(entity);
@@ -79,10 +41,10 @@ public class Database {
      * @param value
      * @param clzz
      * @param <T>
-     * @return
+     * @return {@link T}
      */
     public <T> T decode(ByteBuffer value, Class<T> clzz) {
-        String decoded = decodeToString(value);
+        String decoded = DatabaseHelper.decodeToString(value);
         return gson.fromJson(decoded, clzz);
     }
 
@@ -90,21 +52,28 @@ public class Database {
      * Fetches an object from the database
      * @param key
      * @param <T>
-     * @return
+     * @return {@link Optional<T>}
      */
     public <T> Optional<T> fetch(String key, Class<T> clzz) {
-        return get(key).map(Database::decodeToString).map(d -> gson.fromJson(d, clzz));
+        return get(key).map(DatabaseHelper::decodeToString).map(d -> gson.fromJson(d, clzz));
     }
 
     /**
      * Puts a value/key pair in the database
      * @param key   The key in its string representation
      * @param value The value in its string representation
+     * @return The number of bytes left in the key
      */
     private int put(String key, String value) {
         return put(key.getBytes(UTF_8), value.getBytes(UTF_8));
     }
 
+    /**
+     * Allocates a byte buffer
+     * @param bytes The raw bytes
+     * @param size  The allocation size
+     * @return {@link ByteBuffer}
+     */
     private ByteBuffer allocate(byte[] bytes, int size) {
         final ByteBuffer buffer = allocateDirect(size);
         buffer.put(bytes).flip();
@@ -130,9 +99,9 @@ public class Database {
     }
 
     /**
-     *
-     * @param key
-     * @return
+     * Retrieves data based in a string key
+     * @param key The key associated with the value to be retrieved
+     * @return {@link Optional<ByteBuffer>}
      */
     private Optional<ByteBuffer> get(String key) {
         return get(key.getBytes(UTF_8));
@@ -141,7 +110,7 @@ public class Database {
     /**
      * Retrieves a bytebuffer from the specified key
      * @param bKey
-     * @return
+     * @return {@link Optional<ByteBuffer>}
      */
     private Optional<ByteBuffer> get(byte[] bKey) {
         ByteBuffer found;
@@ -157,7 +126,7 @@ public class Database {
 
     /**
      * Retrieve a cursor iterator
-     * @return
+     * @return {@link Cursor<T>}
      */
     public <T> Cursor<T> getForwardIterator(Class<T> clzz) {
         final Txn<ByteBuffer> txn = env.txnRead();
@@ -165,12 +134,5 @@ public class Database {
         return new Cursor<>(this, cursorIterator, clzz, txn);
     }
 
-    /**
-     * Util method to transform a buffer to a string
-     * @param buffer
-     * @return
-     */
-    private static String decodeToString(ByteBuffer buffer) {
-        return UTF_8.decode(buffer).toString();
-    }
+
 }

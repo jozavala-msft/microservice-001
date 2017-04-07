@@ -2,9 +2,11 @@ package repositories;
 
 import database.Cursor;
 import database.Database;
+import database.DatabaseHelper;
 import models.Todo;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.*;
 
@@ -14,7 +16,7 @@ public class TodoRepository {
     private Database database;
 
     @Inject
-    public TodoRepository(Database database) {
+    public TodoRepository(@Named("todos") Database database) {
         this.database = database;
     }
 

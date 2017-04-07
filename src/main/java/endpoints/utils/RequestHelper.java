@@ -19,7 +19,7 @@ public class RequestHelper {
     /**
      * Creates a new request repository
      * @param context
-     * @return
+     * @return {@link RequestRepository}
      */
     public RequestRepository fromContext(RequestContext context) {
         return new RequestRepository(context, gson);
