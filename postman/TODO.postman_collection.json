@@ -74,6 +74,18 @@
 		},
 		{
 			"name": "POST Create user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"username\", jsonData.username);"
+						]
+					}
+				}
+			],
 			"request": {
 				"url": "http://localhost:9001/users",
 				"method": "POST",
@@ -88,6 +100,17 @@
 					"mode": "raw",
 					"raw": "{\n\t\"username\": \"unrealord2@gmail.com\",\n\t\"password\": \"123\"\n}"
 				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET User by username",
+			"request": {
+				"url": "http://localhost:9001/users/{{username}}",
+				"method": "GET",
+				"header": [],
+				"body": {},
 				"description": ""
 			},
 			"response": []

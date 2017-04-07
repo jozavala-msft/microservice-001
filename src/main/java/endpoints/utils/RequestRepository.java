@@ -21,7 +21,7 @@ public class RequestRepository {
      * @return
      */
     public String getPathArg(String name) {
-        return context.pathArgs().get("uuid");
+        return context.pathArgs().get(name);
     }
 
     /**
