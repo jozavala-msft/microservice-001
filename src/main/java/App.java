@@ -6,6 +6,7 @@ import com.spotify.apollo.httpservice.LoadingException;
 import di.TodoModule;
 import endpoints.ConfigurationController;
 import endpoints.TodoController;
+import endpoints.UsersController;
 
 import java.io.IOException;
 
@@ -21,6 +22,7 @@ public class App {
     static void init(Environment environment) {
         environment.routingEngine()
             .registerAutoRoutes(injector.getInstance(TodoController.class))
-            .registerAutoRoutes(injector.getInstance(ConfigurationController.class));
+            .registerAutoRoutes(injector.getInstance(ConfigurationController.class))
+            .registerAutoRoutes(injector.getInstance(UsersController.class));
     }
 }

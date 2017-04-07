@@ -71,6 +71,26 @@
 				"description": ""
 			},
 			"response": []
+		},
+		{
+			"name": "POST Create user",
+			"request": {
+				"url": "http://localhost:9001/users",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"unrealord2@gmail.com\",\n\t\"password\": \"123\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		}
 	]
 }

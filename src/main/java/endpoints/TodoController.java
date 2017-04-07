@@ -39,15 +39,16 @@ public class TodoController implements RouteProvider {
                 return Response.of(Status.OK, todos);
             }),
             Route.sync("GET", "/todos/<uuid>", context ->
-                todoRepository.getTodo(helper.fromContext(context).getPathArg("uuid")).map(
-                    foundTodo -> Response.of(Status.OK, foundTodo)
+                todoRepository.getTodo(helper.fromContext(context).getPathArg("uuid")).map(foundTodo ->
+                    Response.of(Status.OK, foundTodo)
                 ).orElse(Response.forStatus(Status.NOT_FOUND))
             ),
             Route.sync("POST", "/todos", context ->
-                helper.fromContext(context).fetchJson(Todo.class).map(todo -> {
-                    Todo createdTodo = todoRepository.createTodo(todo.getName(), todo.getDescription(), todo.getDueDate(), todo.getCreatedBy());
-                    return Response.of(Status.CREATED, createdTodo);
-                }).orElse(Response.forStatus(Status.BAD_REQUEST))
+                helper.fromContext(context).fetchJson(Todo.class).map(todo ->
+                    todoRepository.createTodo(todo.getName(), todo.getDescription(), todo.getDueDate(), todo.getCreatedBy()).map(createdTodo ->
+                        Response.of(Status.CREATED, createdTodo)
+                    ).orElse(Response.forStatus(Status.CONFLICT))
+                ).orElse(Response.forStatus(Status.BAD_REQUEST))
             )
         );
     }

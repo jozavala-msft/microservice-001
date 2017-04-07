@@ -31,9 +31,9 @@ public class Database {
      * @param entity
      * @return The number of bytes left in the key
      */
-    public int store(String key, Object entity) {
+    public boolean store(String key, Object entity, boolean detectDuplicate) {
         String payload = gson.toJson(entity);
-        return put(key, payload);
+        return put(key, payload, detectDuplicate);
     }
 
     /**
@@ -64,8 +64,8 @@ public class Database {
      * @param value The value in its string representation
      * @return The number of bytes left in the key
      */
-    private int put(String key, String value) {
-        return put(key.getBytes(UTF_8), value.getBytes(UTF_8));
+    private boolean put(String key, String value, boolean detectDuplicate) {
+        return put(key.getBytes(UTF_8), value.getBytes(UTF_8), detectDuplicate);
     }
 
     /**
@@ -85,17 +85,25 @@ public class Database {
      * @param bKey
      * @param bValue
      */
-    private int put(byte[] bKey, byte[] bValue) {
+    private boolean put(byte[] bKey, byte[] bValue, boolean detectDuplicate) {
         // We want to store some data, so we will need a direct ByteBuffer.
         // Note that LMDB keys cannot exceed maxKeySize bytes (511 bytes by default).
         // Values can be larger.
         final ByteBuffer key = allocate(bKey, env.getMaxKeySize());
-        final ByteBuffer val = allocate(bValue, 700);
-        final int valSize = val.remaining();
-
-        // Now store it. Dbi.put() internally begins and commits a transaction (Txn).
-        dbi.put(key, val);
-        return valSize;
+        final ByteBuffer val = allocate(bValue, bValue.length + 700);
+        boolean bRet = true;
+        try (Txn<ByteBuffer> txn = env.txnWrite()) {
+            if(!detectDuplicate || dbi.get(txn, key) == null) {
+                // Now store it. Dbi.put() internally begins and commits a transaction (Txn).
+                dbi.put(txn, key, val);
+                txn.commit();
+            }
+            else {
+                bRet = false;
+            }
+            txn.close();
+        }
+        return bRet;
     }
 
     /**

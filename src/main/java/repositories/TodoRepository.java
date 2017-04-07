@@ -2,7 +2,6 @@ package repositories;
 
 import database.Cursor;
 import database.Database;
-import database.DatabaseHelper;
 import models.Todo;
 
 import javax.inject.Inject;
@@ -42,7 +41,7 @@ public class TodoRepository {
      * @param createdBy   Created by
      * @return {@link Todo}
      */
-    public Todo createTodo(String name, String description, Date dueDate, String createdBy) {
+    public Optional<Todo> createTodo(String name, String description, Date dueDate, String createdBy) {
         String uuid = UUID.randomUUID().toString();
         Todo todo = Todo.builder()
             .name(name)
@@ -51,8 +50,8 @@ public class TodoRepository {
             .createdBy(createdBy)
             .uuid(uuid)
             .build();
-        database.store(uuid, todo);
-        return todo;
+        boolean bRet = database.store(uuid, todo, true);
+        return bRet ? Optional.of(todo) : Optional.empty();
     }
 
     /**

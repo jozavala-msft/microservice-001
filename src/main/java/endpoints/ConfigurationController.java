@@ -5,7 +5,6 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.route.RouteProvider;
-import database.DatabaseHelper;
 import endpoints.utils.RequestHelper;
 
 import javax.inject.Inject;
